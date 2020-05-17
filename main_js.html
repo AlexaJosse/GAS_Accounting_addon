@@ -1,0 +1,149 @@
+<script>
+  class State {
+    constructor(values) {
+      this.userArray = values.userArray;
+      this.manipArray = values.manipArray.map((manip) => {
+        return {
+          ...manip,
+          ...{
+            hasAnInput: false,
+            amount: 0
+          }
+        }
+      });
+      this.isSubmited = false;
+      this.isValidated = false;
+    }
+
+    update(){
+      console.log("update");
+
+    }
+    {}
+
+    handleEvent(e){
+      return new Promise((resolve,reject)=>{
+
+        switch (e.type) {
+          case "NEW_MANIP":
+          const manipIndex = this.manipArray.findIndex((manip)=>{
+            return manip.name === e.payload
+          })
+            if (manipIndex) {
+              manipArray = manipArray.slice(0,manipIndex)
+              .concat(manip.slice(manipIndex +1));
+              this.update({
+                "maniArray" : manipArray
+              })
+              resolve();
+            } else {
+              reject("manip not in manip list")
+            }
+            break;
+          case "REMOVE_MANIP":
+          const manipIndex = selectedManipInput.find((manip)=>{
+
+          })
+          if(selectedManipInput.inde)
+            break;
+          case "MODIFY_USER":
+
+            break;
+          case "SUBMIT":
+
+            break;
+
+
+          default:
+          reject("wrong event type")
+        }
+    }
+  }
+  }
+
+  /*
+  state.prototype.modify = (e) => {
+      return new Promise((resolve,reject)=>{
+
+        switch (e.type) {
+          case "NEW_MANIP":
+          const manipIndex = manipArray.findIndex((manip)=>{
+            return manip.name === e.payload
+          })
+            if (manipIndex) {
+              manipArray = manipArray.slice(0,manipIndex)
+              .concat(manip.slice(manipIndex +1));
+              update(){}
+              resolve();
+            } else {
+
+              reject("manip not in manip list")
+            }
+            break;
+          case "REMOVE_MANIP":
+          const manipIndex = selectedManipInput.find((manip)=>{
+
+          })
+          if(selectedManipInput.inde)
+            break;
+          case "MODIFY_USER":
+
+            break;
+          case "SUBMIT":
+
+            break;
+
+
+          default:
+          reject("wrong event type")
+        }
+      });
+
+    }
+    */
+  /*
+  on load function
+
+
+  const addManip = () => {
+    const manipName = getManipName()
+      .then((manipName) => {
+        modifyState({
+          type: "NEW_MANIP",
+          payload: manipName
+        })
+
+      })
+      .catch(console.log)
+  }
+
+  const getManipName = () => {
+    return new Promise((resolve, reject) => {
+      const newManipName = document.getElementByID("select_manip").value
+      newManipName ? resolve(newManipName) : reject("No manip selected")
+    })
+  }
+
+  const getDivInputList = () => {
+    return document.getElementByID("input_list")
+  }
+  /*
+  on error function
+
+  const onError = () => {
+
+  }
+  */
+  let state;
+  google.script.run
+    .withSuccessHandler((values) => {
+      values = JSON.parse(values);
+          state = new State(values);
+          state.update();
+    })
+    .withFailureHandler((err) => {
+      console.log("error")
+      console.log(err)
+    })
+    .onSidebarLoaded()
+</script>

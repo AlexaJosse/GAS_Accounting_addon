@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <?!= include('main_js') ?>
+</head>
+
+<body>
+    <div class="block form-group">
+      <label for="select_manip">Add a manip</label>
+      <select id="select_manip">
+        <option value="" selected disabled hidden>Choose here</option>
+      </select>
+      <button id="add_manip_button" onclick="addManip()">Add this manip</button>
+    </div>
+
+    <div class="block form-group">
+      <label for="select_user">Select a gadz</label>
+      <select id="select_user">
+      </select>
+    </div>
+
+
+    <div id ="input_list" class="block form-group">
+      <label for="input_manip">manip 1</label>
+      <input id="input_manip"/>
+    </div>
+
+    <button class="action">Bucquez</button>
+</body>
+</html>

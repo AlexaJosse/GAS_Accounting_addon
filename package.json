@@ -1,0 +1,30 @@
+{
+  "name": "gas_accounting",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "push": "clasp push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexaJosse/GAS_Accounting_Addon.git"
+  },
+  "keywords": [
+    "gas",
+    "accounting",
+    "addon",
+    "google",
+    "apps",
+    "script"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexaJosse/GAS_Accounting_Addon/issues"
+  },
+  "homepage": "https://github.com/AlexaJosse/GAS_Accounting_Addon#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "clasp": "^1.0.0"
+  }
+}
