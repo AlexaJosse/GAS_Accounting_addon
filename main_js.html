@@ -1,5 +1,8 @@
 <script>
-  class State {
+    let formComponent;
+const SELECT_MANIP = "select_manip";
+
+  class FormComponent {
     constructor(values) {
       this.userArray = values.userArray;
       this.manipArray = values.manipArray.map((manip) => {
@@ -11,139 +14,104 @@
           }
         }
       });
+      this.chosenUserIndex = this.userArray[0];
       this.isSubmited = false;
       this.isValidated = false;
+      buildDOM().then(onSuccess)
+        .catch(onError)
+
     }
 
-    update(){
+    update(newState) {
       console.log("update");
-
-    }
-    {}
-
-    handleEvent(e){
-      return new Promise((resolve,reject)=>{
-
-        switch (e.type) {
-          case "NEW_MANIP":
-          const manipIndex = this.manipArray.findIndex((manip)=>{
-            return manip.name === e.payload
-          })
-            if (manipIndex) {
-              manipArray = manipArray.slice(0,manipIndex)
-              .concat(manip.slice(manipIndex +1));
-              this.update({
-                "maniArray" : manipArray
-              })
-              resolve();
-            } else {
-              reject("manip not in manip list")
-            }
-            break;
-          case "REMOVE_MANIP":
-          const manipIndex = selectedManipInput.find((manip)=>{
-
-          })
-          if(selectedManipInput.inde)
-            break;
-          case "MODIFY_USER":
-
-            break;
-          case "SUBMIT":
-
-            break;
-
-
-          default:
-          reject("wrong event type")
+      return new Promise((resolve, reject) => {
+        if (newState.hasOwnProperty("manipArray")) {
+          this.manipArray = newState.manipArray;
         }
-    }
-  }
-  }
-
-  /*
-  state.prototype.modify = (e) => {
-      return new Promise((resolve,reject)=>{
-
-        switch (e.type) {
-          case "NEW_MANIP":
-          const manipIndex = manipArray.findIndex((manip)=>{
-            return manip.name === e.payload
-          })
-            if (manipIndex) {
-              manipArray = manipArray.slice(0,manipIndex)
-              .concat(manip.slice(manipIndex +1));
-              update(){}
-              resolve();
-            } else {
-
-              reject("manip not in manip list")
-            }
-            break;
-          case "REMOVE_MANIP":
-          const manipIndex = selectedManipInput.find((manip)=>{
-
-          })
-          if(selectedManipInput.inde)
-            break;
-          case "MODIFY_USER":
-
-            break;
-          case "SUBMIT":
-
-            break;
-
-
-          default:
-          reject("wrong event type")
+        if (newState.hasOwnProperty("chosenUserIndex")) {
+          this.chosenUserIndex = newState.chosenUserIndex
         }
+        if (newState.hasOwnProperty("isSubmited")) {
+          this.isSubmited = newState.isSubmited;
+        }
+        if (newState.hasOwnProperty("isValidated")) {
+          this.isValidated = newState.isValidated;
+        }
+        this.buildDOM().then(resolve)
+          .catch(reject)
       });
 
     }
-    */
-  /*
-  on load function
+    handleEvent(e) {
+      return new Promise((resolve, reject) => {
+          switch (e.type) {
+            case "NEW_MANIP":
+              const manipIndex = this.manipArray.findIndex((manip) => {
+                return manip.name === e.payload
+              })
+              if (manipIndex) {
+                manipArray = manipArray.slice(0, manipIndex)
+                  .concat(manip.slice(manipIndex + 1));
+                this.update({
+                  "manipArray": manipArray
+                })
+                resolve();
+              } else {
+                reject("manip not in manip list")
+              }
+              break;
+            case "REMOVE_MANIP":
+              const manipIndex = selectedManipInput.find((manip) => {
+
+              })
+              if (selectedManipInput.inde)
+                break;
+            case "MODIFY_USER":
+
+              break;
+            case "SUBMIT":
+
+              break;
 
 
-  const addManip = () => {
-    const manipName = getManipName()
-      .then((manipName) => {
-        modifyState({
-          type: "NEW_MANIP",
-          payload: manipName
+            default:
+              reject("wrong event type")
+          }
+        }
+      }
+      buildDOM() {
+        return new Promise((resolve, reject) => {
+
+
         })
+      }
+    }
+    const onError = (err) => {
+      console.err(JSON.stringify(err))
+    }
+    const onError = (success) => {
+        console.log("Success : " + JSON.stringify(success))
+      }
 
+      const addManip = ()={
+        let selectManipEl = document.getElementByID();
+
+        formComponent.handleEvent({
+          type : "NEW_MANIP",
+          payload :selectManipEl.value
+        }).then(onSucess)
+        .catch(onError)
+      }
+
+    google.script.run
+      .withSuccessHandler((values) => {
+        values = JSON.parse(values);
+        formComponent = new FormComponent(values);
+        formComponent.update();
       })
-      .catch(console.log)
-  }
-
-  const getManipName = () => {
-    return new Promise((resolve, reject) => {
-      const newManipName = document.getElementByID("select_manip").value
-      newManipName ? resolve(newManipName) : reject("No manip selected")
-    })
-  }
-
-  const getDivInputList = () => {
-    return document.getElementByID("input_list")
-  }
-  /*
-  on error function
-
-  const onError = () => {
-
-  }
-  */
-  let state;
-  google.script.run
-    .withSuccessHandler((values) => {
-      values = JSON.parse(values);
-          state = new State(values);
-          state.update();
-    })
-    .withFailureHandler((err) => {
-      console.log("error")
-      console.log(err)
-    })
-    .onSidebarLoaded()
+      .withFailureHandler((err) => {
+        console.log("error")
+        console.log(err)
+      })
+      .onSidebarLoaded()
 </script>
