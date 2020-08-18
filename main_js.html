@@ -1,11 +1,34 @@
 <script>
-    let formComponent;
-const SELECT_MANIP = "select_manip";
+  let formComponent;
+  const SELECT_MANIP = "select_manip";
+  const SELECT_USER = "select_user";
+  const INPUT_LIST = "input_list";
 
+  /**
+   * @class
+   * Form component
+   */
   class FormComponent {
-    constructor(values) {
-      this.userArray = values.userArray;
-      this.manipArray = values.manipArray.map((manip) => {
+    /**
+     * @param {Object[]} userArray
+     * @param {Object[]} manipArray
+     * @constructor
+     */
+    constructor(userArray, manipArray) {
+      /**
+       * @type {Object[]}
+       * Array of selectable users
+       * parameters :
+       *
+       */
+      this.userArray = userArray;
+      /**
+       * @type {Object[]}
+       * Array of selectable manip
+       * parameters :
+       *
+       */
+      this.manipArray = manipArray.map((manip) => {
         return {
           ...manip,
           ...{
@@ -14,19 +37,39 @@ const SELECT_MANIP = "select_manip";
           }
         }
       });
+      /**
+       * @type {number}
+       * Index of the chosen user
+       */
       this.chosenUserIndex = this.userArray[0];
+      /**
+       * @type {boolean}
+       * If the form is submited or not
+       */
       this.isSubmited = false;
+      /**
+       * @type {boolean}
+       * If the form has been validated by the back-end
+       */
       this.isValidated = false;
-      buildDOM().then(onSuccess)
-        .catch(onError)
 
+      // Builds the DOM when the form is displayed
+      Promise.all([this.buildManipSelector, this.buildUserSelector])
+        .then(onSuccess)
+        .catch(onError);
     }
 
-    update(newState) {
+    /**
+     * @param {Object} newState
+     */
+    updateDOM(newState) {
+      // DEV
       console.log("update");
       return new Promise((resolve, reject) => {
         if (newState.hasOwnProperty("manipArray")) {
           this.manipArray = newState.manipArray;
+          buildManipSelector().then(onSuccess)
+            .cath(onError);
         }
         if (newState.hasOwnProperty("chosenUserIndex")) {
           this.chosenUserIndex = newState.chosenUserIndex
@@ -37,25 +80,23 @@ const SELECT_MANIP = "select_manip";
         if (newState.hasOwnProperty("isValidated")) {
           this.isValidated = newState.isValidated;
         }
-        this.buildDOM().then(resolve)
-          .catch(reject)
       });
 
     }
+
+    /**
+     * @param {Object} newState
+     */
     handleEvent(e) {
       return new Promise((resolve, reject) => {
           switch (e.type) {
             case "NEW_MANIP":
-              const manipIndex = this.manipArray.findIndex((manip) => {
-                return manip.name === e.payload
-              })
               if (manipIndex) {
-                manipArray = manipArray.slice(0, manipIndex)
-                  .concat(manip.slice(manipIndex + 1));
-                this.update({
-                  "manipArray": manipArray
-                })
-                resolve();
+                addManipInput()
+                  .then(resolve)
+                  .catch(reject)
+
+
               } else {
                 reject("manip not in manip list")
               }
@@ -79,39 +120,132 @@ const SELECT_MANIP = "select_manip";
           }
         }
       }
-      buildDOM() {
+      /**
+       */
+      buildManipSelector() {
         return new Promise((resolve, reject) => {
+          const manipSelector = document.getElementByID(SELECT_MANIP);
+          for(let opt in manipSelector.options){
+            delete opt;
+          }
+          let newOpt;
+          for (let manip of this.manipArray) {
+            if(!manip.hasAnInput){
+              newOpt = document.createElement('option');
+              newOpt.value = manip.bucque;
+              newOpt.innerHTML = manip.name;
+              manipSelector.appendChild(newOpt);
+            }
+          }
+          resolve("Manip selector building successfull");
+        });
+      }
+
+      /**
+       */
+      buildUserSelector() {
+        return new Promise((resolve, reject) => {
+          const userSelector = document.getElementByID(SELECT_USER);
+          let newOpt;
+          for (let user of this.userArray) {
+            newOpt = document.createElement('option');
+            newOpt.value = user.bucque;
+            newOpt.innerHTML = upperFirstLetter(user.firstName) + " " +
+              upperFirstLetter(user.lastName);
+            userSelector.appendChild(newOpt);
+          }
+          resolve("user selector building successfull");
+        })
+      }
 
 
+    addManipInput() {
+      return new Promise((resolve, reject) => {
+        const manipSelector = document.getElementByID(SELECT_MANIP);
+        const manipIndex = this.manipArray.findIndex((manip)=> manip.name === manipSelector.value);
+        const manip = this.manipArray[manipIndex];
+        if(manip && manip.hasAnInput === true){
+            reject("Manip already has an input");
+        }
+
+        createNewInput(manip.name,manipIndex)
+        .then((newInputLi)=>{
+          const inputList = document.getElementByID(INPUT_LIST);
+          inputList.appendChild(newInputLi);
+          manip.hasAnInput = true;
+          resolve();
+        })
+        .catch(onError)
+      })
+      }
+
+      removeManip(manipName){
+        const inputList = document.getElementByID(INPUT_LIST);
+        const liList = inputList.children;
+        const liManip = liList.find((li)=> li.manipName === manipName);
+
+      }
+
+      createNewInput(manipName){
+        return new Promise((resolve)=>{
+          const newInputLi = document.createElement("li");
+          newInputLi.manipName = manipName;
+          newInputLi.manipIndex = manipIndex
+          // title
+          const title = document.createElement("h3");
+          title.innerHTML = manipName;
+          // input
+          const input = document.createElement("input");
+          newInputLi.appendChild(document.createElement("input"));
+          // button
+          const button = document.createElement("button");
+          button.innerHTML = "Delete";
+          button.onClick = () => this.removeManip("manipName");
+
+          newInputLi.appendChild(title);
+          newInputLi.appendChild(input);
+          newInputLi.appendChild(button)
+          return newInputLi
         })
       }
     }
+
+
+    /**
+     * @param {object} err
+     */
     const onError = (err) => {
       console.err(JSON.stringify(err))
     }
-    const onError = (success) => {
-        console.log("Success : " + JSON.stringify(success))
-      }
+    /**
+     * @param {Object} success
+     */
+    const onSuccess = (success) => {
+      console.log("Success : " + JSON.stringify(success))
+    }
 
-      const addManip = ()={
-        let selectManipEl = document.getElementByID();
+    /**
+     */
+    const addManip = () = {
+      let selectManipEl = document.getElementByID();
 
-        formComponent.handleEvent({
-          type : "NEW_MANIP",
-          payload :selectManipEl.value
-        }).then(onSucess)
-        .catch(onError)
-      }
+      formComponent.handleEvent({
+        type: "NEW_MANIP",
+        payload: selectManipEl.value
+      }).then(onSuccess)
+      .catch(onError)
+    }
 
     google.script.run
       .withSuccessHandler((values) => {
         values = JSON.parse(values);
-        formComponent = new FormComponent(values);
-        formComponent.update();
+        formComponent = new FormComponent(values.userArray, values.manipArray);
       })
-      .withFailureHandler((err) => {
-        console.log("error")
-        console.log(err)
-      })
+      .withFailureHandler(onError)
       .onSidebarLoaded()
+
+
+    /**
+     */
+    const upperFirstLetter = (str) => str[0].toUpperCase() + str.slice(1).toLowerCase();
 </script>

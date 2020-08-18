@@ -24,7 +24,7 @@ const getUsers = (mainSheet) => {
       return {
         lastName: userRow[0],
         firstName: userRow[1],
-        bucque: userRow[2],
+        nickName: userRow[2],
         number: userRow[3],
       }
     });
