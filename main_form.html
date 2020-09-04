@@ -3,17 +3,16 @@
 
 <head>
   <base target="_top">
-  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <?!= include('main_js') ?>
 </head>
 
 <body>
+
   <div class="block form-group">
     <label for="select_manip">Add a manip</label>
     <select id="select_manip">
       <option value="" disabled hidden>Choose here</option>
     </select>
-    <button id="add_manip_button" onclick="addManip()">Add this manip</button>
+    <button id="add_manip_button" >Add this manip</button>
   </div>
 
   <div class="block form-group">
@@ -32,5 +31,17 @@
 
   <button class="action">Bucquez</button>
 </body>
-
+  <?!= include('main_js_1') ?>
+<script>
+google.script.run
+  .withSuccessHandler((values) => {
+    values = JSON.parse(values);
+    console.log("Got data from back-end ")
+    console.log(values.userArray);
+    console.log(values.manipArray);
+    formComponent = new FormComponent(values.userArray, values.manipArray);
+  })
+  .withFailureHandler(onError)
+  .onSidebarLoaded()
+</script>
 </html>
