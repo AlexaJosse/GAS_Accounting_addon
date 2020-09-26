@@ -1,8 +1,13 @@
 <script>
-  let formComponent;
   const SELECT_MANIP = "select_manip";
   const SELECT_USER = "select_user";
   const INPUT_LIST = "input_list";
+  const ADD_MANIP_BUTTON = "add_manip_button";
+
+  const manipSelector = document.getElementById(SELECT_MANIP);
+  const userSelector = document.getElementById(SELECT_USER);
+  const inputList = document.getElementById(INPUT_LIST);
+  const addManipButton = document.getElementById(ADD_MANIP_BUTTON);
 
   /**
    * @class
@@ -10,242 +15,196 @@
    */
   class FormComponent {
     /**
-     * @param {Object[]} userArray
-     * @param {Object[]} manipArray
+     * @param {object[]} userArray
+     * @param {object[]} manipArray
      * @constructor
      */
     constructor(userArray, manipArray) {
       /**
-       * @type {Object[]}
+       * @type {object[]}
        * Array of selectable users
        * parameters :
-       *
+       * @type {string} lastName
+       * @type {string} firstName
+       * @type {number} number
        */
-      this.userArray = userArray;
+      this.userArray = userArray.map((user) => ({
+        ...user,
+        id: user.nickName + "_" + user.number
+      }))
       /**
-       * @type {Object[]}
+       * @type {object[]}
        * Array of selectable manip
+       * parameters :
+       * @type {string} date
+       * @type {string} name
+       */
+      this.manipArray = manipArray;
+
+      /**
+       * @type {object}
+       * Array of manip which got an input
        * parameters :
        *
        */
-      this.manipArray = manipArray.map((manip) => {
-        return {
-          ...manip,
-          ...{
-            hasAnInput: false,
-            amount: 0
-          }
-        }
-      });
-      /**
-       * @type {number}
-       * Index of the chosen user
-       */
-      this.chosenUserIndex = this.userArray[0];
-      /**
-       * @type {boolean}
-       * If the form is submited or not
-       */
-      this.isSubmited = false;
-      /**
-       * @type {boolean}
-       * If the form has been validated by the back-end
-       */
-      this.isValidated = false;
+      this.inputObject = {};
 
-      // Builds the DOM when the form is displayed
-      Promise.all([this.buildManipSelector, this.buildUserSelector])
+      Promise.all([this.buildManipSelector(), this.buildUserSelector()])
         .then(onSuccess)
         .catch(onError);
     }
 
     /**
-     * @param {Object} newState
      */
-    updateDOM(newState) {
-      // DEV
-      console.log("update");
+    buildManipSelector() {
       return new Promise((resolve, reject) => {
-        if (newState.hasOwnProperty("manipArray")) {
-          this.manipArray = newState.manipArray;
-          buildManipSelector().then(onSuccess)
-            .cath(onError);
-        }
-        if (newState.hasOwnProperty("chosenUserIndex")) {
-          this.chosenUserIndex = newState.chosenUserIndex
-        }
-        if (newState.hasOwnProperty("isSubmited")) {
-          this.isSubmited = newState.isSubmited;
-        }
-        if (newState.hasOwnProperty("isValidated")) {
-          this.isValidated = newState.isValidated;
+        try {
+          let manipOptionsArray = manipSelector.options;
+          while (manipOptionsArray.length > 0) {
+            manipOptionsArray[0].remove();
+          }
+
+          for (let manip of this.manipArray) {
+            if (this.inputObject[manip.name] === undefined) {
+              manipSelector.appendChild(getNewManipOption(manip.name));
+            }
+          }
+
+          resolve("manip selector building successfull");
+        } catch (err) {
+          reject(err);
         }
       });
-
     }
 
     /**
-     * @param {Object} newState
      */
-    handleEvent(e) {
+    buildUserSelector() {
       return new Promise((resolve, reject) => {
-          switch (e.type) {
-            case "NEW_MANIP":
-              if (manipIndex) {
-                addManipInput()
-                  .then(resolve)
-                  .catch(reject)
-
-
-              } else {
-                reject("manip not in manip list")
-              }
-              break;
-            case "REMOVE_MANIP":
-              const manipIndex = selectedManipInput.find((manip) => {
-
-              })
-              if (selectedManipInput.inde)
-                break;
-            case "MODIFY_USER":
-
-              break;
-            case "SUBMIT":
-
-              break;
-
-
-            default:
-              reject("wrong event type")
-          }
+        for (let user of this.userArray) {
+          userSelector.appendChild(getNewUserOption(user));
         }
-      }
-      /**
-       */
-      buildManipSelector() {
-        return new Promise((resolve, reject) => {
-          const manipSelector = document.getElementByID(SELECT_MANIP);
-          for(let opt in manipSelector.options){
-            delete opt;
-          }
-          let newOpt;
-          for (let manip of this.manipArray) {
-            if(!manip.hasAnInput){
-              newOpt = document.createElement('option');
-              newOpt.value = manip.bucque;
-              newOpt.innerHTML = manip.name;
-              manipSelector.appendChild(newOpt);
-            }
-          }
-          resolve("Manip selector building successfull");
-        });
-      }
-
-      /**
-       */
-      buildUserSelector() {
-        return new Promise((resolve, reject) => {
-          const userSelector = document.getElementByID(SELECT_USER);
-          let newOpt;
-          for (let user of this.userArray) {
-            newOpt = document.createElement('option');
-            newOpt.value = user.bucque;
-            newOpt.innerHTML = upperFirstLetter(user.firstName) + " " +
-              upperFirstLetter(user.lastName);
-            userSelector.appendChild(newOpt);
-          }
-          resolve("user selector building successfull");
-        })
-      }
-
+        resolve("user selector building successfull");
+      })
+    }
 
     addManipInput() {
       return new Promise((resolve, reject) => {
-        const manipSelector = document.getElementByID(SELECT_MANIP);
-        const manipIndex = this.manipArray.findIndex((manip)=> manip.name === manipSelector.value);
+        setManipSelectoreState(true);
+        const manipValue = manipSelector.value;
+        const manipIndex = this.manipArray.findIndex((manip) => manip.name === manipValue);
         const manip = this.manipArray[manipIndex];
-        if(manip && manip.hasAnInput === true){
-            reject("Manip already has an input");
+        if (manip && this.inputObject[manip.name] !== undefined) {
+          throw new Error("Manip already has an input");
+        } else {
+          getNewInput(manip.name, manipIndex)
+            .then((newInputLi) => {
+              inputList.appendChild(newInputLi);
+              this.inputObject[manip.name] = 0;
+              this.buildManipSelector()
+                .then((data) => {
+                  if (Object.keys(this.inputObject).length !== this.manipArray.length) {
+                    setManipSelectoreState();
+                  }
+                  resolve();
+                })
+            })
+            .catch(reject)
         }
-
-        createNewInput(manip.name,manipIndex)
-        .then((newInputLi)=>{
-          const inputList = document.getElementByID(INPUT_LIST);
-          inputList.appendChild(newInputLi);
-          manip.hasAnInput = true;
-          resolve();
-        })
-        .catch(onError)
       })
-      }
-
-      removeManip(manipName){
-        const inputList = document.getElementByID(INPUT_LIST);
-        const liList = inputList.children;
-        const liManip = liList.find((li)=> li.manipName === manipName);
-
-      }
-
-      createNewInput(manipName){
-        return new Promise((resolve)=>{
-          const newInputLi = document.createElement("li");
-          newInputLi.manipName = manipName;
-          newInputLi.manipIndex = manipIndex
-          // title
-          const title = document.createElement("h3");
-          title.innerHTML = manipName;
-          // input
-          const input = document.createElement("input");
-          newInputLi.appendChild(document.createElement("input"));
-          // button
-          const button = document.createElement("button");
-          button.innerHTML = "Delete";
-          button.onClick = () => this.removeManip("manipName");
-
-          newInputLi.appendChild(title);
-          newInputLi.appendChild(input);
-          newInputLi.appendChild(button)
-          return newInputLi
-        })
-      }
     }
 
-
-    /**
-     * @param {object} err
-     */
-    const onError = (err) => {
-      console.err(JSON.stringify(err))
-    }
-    /**
-     * @param {Object} success
-     */
-    const onSuccess = (success) => {
-      console.log("Success : " + JSON.stringify(success))
-    }
-
-    /**
-     */
-    const addManip = () = {
-      let selectManipEl = document.getElementByID();
-
-      formComponent.handleEvent({
-        type: "NEW_MANIP",
-        payload: selectManipEl.value
-      }).then(onSuccess)
-      .catch(onError)
-    }
-
-    google.script.run
-      .withSuccessHandler((values) => {
-        values = JSON.parse(values);
-        formComponent = new FormComponent(values.userArray, values.manipArray);
+    deleteInput(inputLiElement) {
+      const manipName = inputLiElement.id
+      return new Promise((resolve, reject) => {
+        if (this.inputObject[manipName] !== undefined) {
+          delete this.inputObject[manipName];
+          inputLiElement.remove();
+          this.buildManipSelector()
+            .then(() => {
+              setManipSelectoreState(false);
+              resolve("Input deleted");
+            })
+            .catch(reject);
+        } else {
+          reject("No input found for the manip " + manipName);
+        }
       })
-      .withFailureHandler(onError)
-      .onSidebarLoaded()
+    }
+  }
+
+  const setManipSelectoreState = (bool) => {
+    manipSelector.disabled = bool ? true : false;
+    addManipButton.disabled = bool ? true : false;
+  }
+  /**
+   * @param {object} err
+   */
+  const onError = (error) => {
+    console.log("Got an error :");
+    console.log(error.message);
+    console.error(error);
+  }
+
+  /**
+   * @param {object} success
+   */
+  const onSuccess = (success) => {
+    console.log("Success : " + JSON.stringify(success))
+  }
+
+  const getNewUserOption = (user, selected) => new Option(upperFirstLetter(user.firstName) +
+    " " + upperFirstLetter(user.lastName),
+    user.id, selected ? true : false, false);
+
+  const getNewManipOption = (manipName, selected) => new Option(manipName, manipName, selected ? true : false, false)
+
+  const getNewInput = (manipName, manipIndex) => {
+    return new Promise((resolve, reject) => {
+      const newInputLi = document.createElement("li");
+      newInputLi.id = manipName;
+      // title
+      const title = document.createElement("h5");
+      title.innerHTML = manipName;
+      // input
+      const input = document.createElement("input");
+      ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+        input.addEventListener(event, function() {
+          if (!inputFilter(this.value)) {
+            this.value = this.oldValue;
+          } else {
+            this.oldValue = this.value;
+          }
+        })
+      })
+
+      // button
+      const button = document.createElement("button");
+      button.innerHTML = "Delete";
+      button.onclick = deleteManip();
+
+      newInputLi.appendChild(title);
+      newInputLi.appendChild(input);
+      newInputLi.appendChild(button);
+      resolve(newInputLi);
+    })
+  }
 
 
-    /**
-     */
-    const upperFirstLetter = (str) => str[0].toUpperCase() + str.slice(1).toLowerCase();
+  /**
+  Onclick event functions
+  */
+
+  const deleteManip = () => (event) => mainForm.deleteInput(event.originalTarget.parentNode)
+    .then(onSuccess)
+    .catch(onError)
+  const addManipInput = () => mainForm.addManipInput()
+    .then(onSuccess)
+    .catch(onError)
+  /**
+   * @param {string} a string
+   */
+  const upperFirstLetter = (str) => str[0].toUpperCase() + str.slice(1).toLowerCase();
+
+  const inputFilter = (value) => /^\d*\.?(?:\d{1,2})?$/.test(value)
 </script>
