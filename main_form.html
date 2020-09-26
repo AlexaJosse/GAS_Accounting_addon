@@ -9,40 +9,39 @@
 <body>
 
   <div class="block form-group">
-    <label for="select_manip">Add a manip</label>
+    <h3>Add a manip</h3>
     <select id="select_manip">
-      <option value="" disabled hidden>Choose here</option>
     </select>
-    <button id="add_manip_button" >Add this manip</button>
+    <button id="add_manip_button" onclick="addManipInput()">Add this manip</button>
   </div>
 
   <div class="block form-group">
-    <label for="select_user">Select a gadz</label>
+    <h3>Select a gadz</h3>
     <select id="select_user">
       <option value="" disabled hidden>Choose here</option>
     </select>
   </div>
 
-
   <div class="block form-group">
-    <label for="input_manip">Manip input</label>
+    <h3>Manip input</h3>
     <ul id="input_list" class="block form-group">
     </ul>
   </div>
 
   <button class="action">Bucquez</button>
 </body>
-  <?!= include('main_js_1') ?>
+<?!= include('main_js') ?>
 <script>
-google.script.run
-  .withSuccessHandler((values) => {
-    values = JSON.parse(values);
-    console.log("Got data from back-end ")
-    console.log(values.userArray);
-    console.log(values.manipArray);
-    formComponent = new FormComponent(values.userArray, values.manipArray);
-  })
-  .withFailureHandler(onError)
-  .onSidebarLoaded()
+  google.script.run
+    .withSuccessHandler((values) => {
+      values = JSON.parse(values);
+      console.log("Got data from back-end ")
+      console.log(values.userArray);
+      console.log(values.manipArray);
+      mainForm = new FormComponent(values.userArray, values.manipArray);
+    })
+    .withFailureHandler(onError)
+    .onSidebarLoaded()
 </script>
+
 </html>
