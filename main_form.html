@@ -1,7 +1,35 @@
 <!DOCTYPE html>
 <html>
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+<style>
+  body {
+    display:flex;
+    flex-direction: column;
+  }
+  button {
+    margin : 0px 10px 5px 10px;
+  }
+  #error {
+    display: none;
+    min-height: 29px;
+    line-height: 27px;
+    margin : 5px 10px 5px 10px;
+    color: #fff;
+    background-color:#ff0000;
+    border :1px solid #ff0000;
+    border-radius :2px;
+    box-shadow: none;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    font-family: arial, sans-serif;
+  }
+  #error:hover {
+    background: -webkit-linear-gradient(top, #ff3333, #ff0000);
+    border :1px solid grey
+  }
 
+</style>
 <head>
   <base target="_top">
 </head>
@@ -29,6 +57,10 @@
   </div>
 
   <button class="action">Bucquez</button>
+
+  <span id='error'>
+    Error
+  </span>
 </body>
 <?!= include('main_js') ?>
 <script>
