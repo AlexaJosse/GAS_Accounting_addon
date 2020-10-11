@@ -1,14 +1,14 @@
 <script>
   /// CONSTANT DECLARATION ///
 
-  // Ids of HTML elements
+  // Ids of HTML elements //
   const SELECT_MANIP = "select_manip";
   const SELECT_USER = "select_user";
   const INPUT_LIST = "input_list";
   const ADD_MANIP_BUTTON = "add_manip_button";
   const ERROR = "error";
 
-  // HTML Elements
+  // HTML Elements //
   const manipSelector = document.getElementById(SELECT_MANIP);
   const userSelector = document.getElementById(SELECT_USER);
   const inputList = document.getElementById(INPUT_LIST);
@@ -285,7 +285,7 @@
     });
   };
 
-  /// Onclick event functions ///
+  // Onclick event functions //
 
   /**
    * deleteManip function
@@ -308,7 +308,7 @@
    */
   const onSubmit = () => mainForm.onSubmit().then(onSuccess).catch(onError);
 
-  ///utils function ///
+  // utils function //
   /**
    * upperFirstLetter function
    * @param {string} str
