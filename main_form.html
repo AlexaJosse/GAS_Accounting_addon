@@ -64,7 +64,7 @@
 
     <div class="block form-group">
       <h3>Select a gadz</h3>
-      <select id="select_user" disabled>
+      <select id="select_user" onchange="onChangeUser()" disabled>
         <option value="" selected="selected" disabled>Choose here</option>
       </select>
     </div>
@@ -74,7 +74,7 @@
       <ul id="input_list" class="block form-group"></ul>
     </div>
 
-    <button class="action" disabled>Bucquez</button>
+    <button id="submit_button" class="action" disabled>Bucquez</button>
 
     <span id="error" onclick="dismissError()">Error</span>
 
