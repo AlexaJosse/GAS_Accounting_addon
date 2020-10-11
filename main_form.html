@@ -56,16 +56,16 @@
   <body>
     <div class="block form-group">
       <h3>Add a manip</h3>
-      <select id="select_manip"></select>
-      <button id="add_manip_button" onclick="addManipInput()">
+      <select id="select_manip" disabled></select>
+      <button id="add_manip_button" onclick="addManipInput()" disabled>
         Add this manip
       </button>
     </div>
 
     <div class="block form-group">
       <h3>Select a gadz</h3>
-      <select id="select_user">
-        <option value="" disabled hidden>Choose here</option>
+      <select id="select_user" disabled>
+        <option value="" selected="selected" disabled>Choose here</option>
       </select>
     </div>
 
@@ -74,7 +74,7 @@
       <ul id="input_list" class="block form-group"></ul>
     </div>
 
-    <button class="action">Bucquez</button>
+    <button class="action" disabled>Bucquez</button>
 
     <span id="error" onclick="dismissError()">Error</span>
 

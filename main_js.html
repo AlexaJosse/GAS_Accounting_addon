@@ -56,7 +56,11 @@
 
       // Initialize the form by filling the manip selector and the user selector
       Promise.all([this.buildManipSelector(), this.buildUserSelector()])
-        .then(onSuccess)
+        .then((data) => {
+          setManipSelectoreState(false);
+          setUserSelectoreState(false);
+          onSuccess(data);
+        })
         .catch(onError);
     }
 
@@ -119,7 +123,7 @@
         if (manip && this.inputObject[manip.name] !== undefined) {
           throw new Error("Manip already has an input");
         } else {
-          getNewInput(manip.name, manipIndex)
+          getNewInput(manip.name)
             .then((newInputLi) => {
               inputList.appendChild(newInputLi);
               this.inputObject[manip.name] = 0;
@@ -128,7 +132,7 @@
                   Object.keys(this.inputObject).length !==
                   this.manipArray.length
                 ) {
-                  setManipSelectoreState();
+                  setManipSelectoreState(false);
                 }
                 resolve();
               });
@@ -201,30 +205,46 @@
   };
 
   /**
-   * setManipSelectoreState function
+   * setUserSelectoreState function
+   * @param {boolean} toDisabled
+   */
+  const setUserSelectoreState = (toDisabled) => {
+    userSelector.disabled = toDisabled ? true : false;
+  };
+
+  /**
+   * getNewUserOption function
    * @param {object} user
-   * @param {boolean} selected
    * @return {Element} an option element
    */
-  const getNewUserOption = (user, selected) =>
+  const getNewUserOption = (user) =>
     new Option(
       upperFirstLetter(user.firstName) + " " + upperFirstLetter(user.lastName),
       user.id,
-      selected ? true : false,
+      false,
       false
     );
 
   /**
-   * setManipSelectoreState function
+   * getNewManipOption function
    * @param {string} manipName
    * @param {boolean} selected
    * @return {Element} an option element
    */
-  const getNewManipOption = (manipName, selected) =>
-    new Option(manipName, manipName, selected ? true : false, false);
+  const getNewManipOption = (manipName) =>
+    new Option(manipName, manipName, false, false);
 
-  const getNewInput = (manipName, manipIndex) => {
+  /**
+   * getNewInput function
+   * Creates and returns a li element
+   * The element contains an input which only accept numbers
+   * The elements also contains a delete button
+   * @param {string} manipName
+   * @return {Element} an li element
+   */
+  const getNewInput = (manipName) => {
     return new Promise((resolve, reject) => {
+      // Creates the li parent element
       const newInputLi = document.createElement("li");
       newInputLi.id = manipName;
       // title
@@ -255,8 +275,9 @@
       const button = document.createElement("button");
       button.classList.add("deleteButton");
       button.innerHTML = "X";
-      button.onclick = deleteManip();
+      button.onclick = deleteManip;
 
+      // Appends every element to the li parent
       newInputLi.appendChild(title);
       newInputLi.appendChild(input);
       newInputLi.appendChild(button);
@@ -264,25 +285,40 @@
     });
   };
 
-  /**
-  Onclick event functions
-  */
+  /// Onclick event functions ///
 
-  const deleteManip = () => (event) =>
+  /**
+   * deleteManip function
+   * @param {MouseEvent} event
+   */
+  const deleteManip = (event) =>
     mainForm
       .deleteInput(event.originalTarget.parentNode)
       .then(onSuccess)
-      .catch(mainForm.onError);
-
-  const addManipInput = () =>
-    mainForm.addManipInput().then(onSuccess).catch(mainForm.onError);
+      .catch(onError);
 
   /**
+   * addManipInput function
+   */
+  const addManipInput = () =>
+    mainForm.addManipInput().then(onSuccess).catch(onError);
+
+  /**
+   * onSubmit function
+   */
+  const onSubmit = () => mainForm.onSubmit().then(onSuccess).catch(onError);
+
+  ///utils function ///
+  /**
    * upperFirstLetter function
-   * @param {string} a string
+   * @param {string} str
    */
   const upperFirstLetter = (str) =>
     str[0].toUpperCase() + str.slice(1).toLowerCase();
 
+  /**
+   * inputFilter function
+   * @param {string} value
+   */
   const inputFilter = (value) => /^\d*\.?(?:\d{1,2})?$/.test(value);
 </script>
