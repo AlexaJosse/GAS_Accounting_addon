@@ -1,33 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%">
+  <link
+    rel="stylesheet"
+    href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
+  />
+  <style>
+    body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    div {
+      margin: 0px 10px 0px 10px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0px;
+    }
+    button {
+      margin: 0px 10px 5px 10px;
+    }
+    #error {
+      display: none;
+      min-height: 29px;
+      line-height: 27px;
+      margin: 5px 10px 5px 10px;
+      color: #fff;
+      background-color: #ff0000;
+      border: 1px solid #ff0000;
+      border-radius: 2px;
+      box-shadow: none;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: center;
+      font-family: arial, sans-serif;
+    }
+    #error:hover {
+      background: -webkit-linear-gradient(top, #ff3333, #ff0000);
+      border: 1px solid grey;
+    }
+    #issue_link {
+      margin-top: auto;
+      margin-bottom: 10px;
+      align-self: center;
+      font-size: 12;
+    }
+    .deleteButton {
+      min-width: 0px;
+    }
+  </style>
+  <head>
+    <base target="_top" />
+  </head>
 
-<head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <body>
+    <div class="block form-group">
+      <h3>Add a manip</h3>
+      <select id="select_manip" disabled></select>
+      <button id="add_manip_button" onclick="addManipInput()" disabled>
+        Add this manip
+      </button>
+    </div>
+
+    <div class="block form-group">
+      <h3>Select a gadz</h3>
+      <select id="select_user" onchange="onChangeUser()" disabled>
+        <option value="" selected="selected" disabled>Choose here</option>
+      </select>
+    </div>
+
+    <div class="block form-group">
+      <h3>Manip input</h3>
+      <ul id="input_list" class="block form-group"></ul>
+    </div>
+
+    <button id="submit_button" class="action" disabled>Bucquez</button>
+
+    <span id="error" onclick="dismissError()">Error</span>
+
+    <a
+      id="issue_link"
+      target="blank"
+      href="https://github.com/AlexaJosse/Spreadsheet_Accounting_Addon/issues"
+      >Un bug ?</a
+    >
+  </body>
   <?!= include('main_js') ?>
-</head>
-
-<body>
-    <div class="block form-group">
-      <label for="select_manip">Add a manip</label>
-      <select id="select_manip">
-        <option value="" disabled hidden>Choose here</option>
-      </select>
-      <button id="add_manip_button" onclick="addManip()">Add this manip</button>
-    </div>
-
-    <div class="block form-group">
-      <label for="select_user">Select a gadz</label>
-      <select id="select_user">
-      </select>
-    </div>
-
-
-    <div id ="input_list" class="block form-group">
-      <label for="input_manip">manip 1</label>
-      <input id="input_manip"/>
-    </div>
-
-    <button class="action">Bucquez</button>
-</body>
+  <script>
+    google.script.run
+      .withSuccessHandler((values) => {
+        values = JSON.parse(values);
+        console.log("Got data from back-end ");
+        mainForm = new FormComponent(values.userArray, values.manipArray);
+      })
+      .withFailureHandler(onError)
+      .onSidebarLoaded();
+  </script>
 </html>
