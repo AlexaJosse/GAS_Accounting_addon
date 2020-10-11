@@ -1,13 +1,19 @@
 <script>
+  /// CONSTANT DECLARATION ///
+
+  // Ids of HTML elements
   const SELECT_MANIP = "select_manip";
   const SELECT_USER = "select_user";
   const INPUT_LIST = "input_list";
   const ADD_MANIP_BUTTON = "add_manip_button";
+  const ERROR = "error";
 
+  // HTML Elements
   const manipSelector = document.getElementById(SELECT_MANIP);
   const userSelector = document.getElementById(SELECT_USER);
   const inputList = document.getElementById(INPUT_LIST);
   const addManipButton = document.getElementById(ADD_MANIP_BUTTON);
+  const errorSpan = document.getElementById(ERROR);
 
   /**
    * @class
@@ -23,38 +29,43 @@
       /**
        * @type {object[]}
        * Array of selectable users
-       * parameters :
-       * @type {string} lastName
-       * @type {string} firstName
-       * @type {number} number
+       * user parameters :
+       * lastName
+       * firstName
+       * number
        */
       this.userArray = userArray.map((user) => ({
         ...user,
-        id: user.nickName + "_" + user.number
-      }))
+        id: user.nickName + "_" + user.number,
+      }));
+
       /**
        * @type {object[]}
        * Array of selectable manip
        * parameters :
-       * @type {string} date
-       * @type {string} name
+       * date
+       * name
        */
       this.manipArray = manipArray;
 
       /**
        * @type {object}
-       * Array of manip which got an input
-       * parameters :
-       *
+       * object of manip which got an input
        */
       this.inputObject = {};
 
+      // Initialize the form by filling the manip selector and the user selector
       Promise.all([this.buildManipSelector(), this.buildUserSelector()])
         .then(onSuccess)
         .catch(onError);
     }
 
     /**
+     * buildManipSelector method.
+     * Erase all option element from the manip selector
+     * then creates and inserts an option for each manip
+     * that can be selectable
+     * @return {Promise}
      */
     buildManipSelector() {
       return new Promise((resolve, reject) => {
@@ -78,6 +89,9 @@
     }
 
     /**
+     * buildUserSelector method.
+     * Creates and inserts an option for selectable user
+     * @return {Promise}
      */
     buildUserSelector() {
       return new Promise((resolve, reject) => {
@@ -85,14 +99,22 @@
           userSelector.appendChild(getNewUserOption(user));
         }
         resolve("user selector building successfull");
-      })
+      });
     }
 
+    /**
+     * addManipInput method.
+     * Creates and inserts an li HTML elements for the selected manip
+     * The li elements contains a title, an input and a delete button
+     * @return {Promise}
+     */
     addManipInput() {
       return new Promise((resolve, reject) => {
         setManipSelectoreState(true);
         const manipValue = manipSelector.value;
-        const manipIndex = this.manipArray.findIndex((manip) => manip.name === manipValue);
+        const manipIndex = this.manipArray.findIndex(
+          (manip) => manip.name === manipValue
+        );
         const manip = this.manipArray[manipIndex];
         if (manip && this.inputObject[manip.name] !== undefined) {
           throw new Error("Manip already has an input");
@@ -101,21 +123,29 @@
             .then((newInputLi) => {
               inputList.appendChild(newInputLi);
               this.inputObject[manip.name] = 0;
-              this.buildManipSelector()
-                .then((data) => {
-                  if (Object.keys(this.inputObject).length !== this.manipArray.length) {
-                    setManipSelectoreState();
-                  }
-                  resolve();
-                })
+              this.buildManipSelector().then((data) => {
+                if (
+                  Object.keys(this.inputObject).length !==
+                  this.manipArray.length
+                ) {
+                  setManipSelectoreState();
+                }
+                resolve();
+              });
             })
-            .catch(reject)
+            .catch(reject);
         }
-      })
+      });
     }
 
+    /**
+     * deleteInput method.
+     * Deletes the inputLiElement and removes the associated manip from the inputObject
+     * @param {Element} inputLiElement
+     * @return {Promise}
+     */
     deleteInput(inputLiElement) {
-      const manipName = inputLiElement.id
+      const manipName = inputLiElement.id;
       return new Promise((resolve, reject) => {
         if (this.inputObject[manipName] !== undefined) {
           delete this.inputObject[manipName];
@@ -129,35 +159,69 @@
         } else {
           reject("No input found for the manip " + manipName);
         }
-      })
+      });
     }
   }
 
-  const setManipSelectoreState = (bool) => {
-    manipSelector.disabled = bool ? true : false;
-    addManipButton.disabled = bool ? true : false;
-  }
   /**
-   * @param {object} err
+   * onError function
+   * @param {object} error
    */
   const onError = (error) => {
     console.log("Got an error :");
     console.log(error.message);
     console.error(error);
-  }
+    errorSpan.innerHTML = error.message;
+    errorSpan.style.display = null;
+  };
 
   /**
+   * dismissError function
+   * @param {object} error
+   */
+  const dismissError = () => {
+    errorSpan.style.display = "none";
+  };
+
+  /**
+   * onSuccess function
    * @param {object} success
    */
   const onSuccess = (success) => {
-    console.log("Success : " + JSON.stringify(success))
-  }
+    console.log("Success : " + JSON.stringify(success));
+  };
 
-  const getNewUserOption = (user, selected) => new Option(upperFirstLetter(user.firstName) +
-    " " + upperFirstLetter(user.lastName),
-    user.id, selected ? true : false, false);
+  /**
+   * setManipSelectoreState function
+   * @param {boolean} toDisabled
+   */
+  const setManipSelectoreState = (toDisabled) => {
+    manipSelector.disabled = toDisabled ? true : false;
+    addManipButton.disabled = toDisabled ? true : false;
+  };
 
-  const getNewManipOption = (manipName, selected) => new Option(manipName, manipName, selected ? true : false, false)
+  /**
+   * setManipSelectoreState function
+   * @param {object} user
+   * @param {boolean} selected
+   * @return {Element} an option element
+   */
+  const getNewUserOption = (user, selected) =>
+    new Option(
+      upperFirstLetter(user.firstName) + " " + upperFirstLetter(user.lastName),
+      user.id,
+      selected ? true : false,
+      false
+    );
+
+  /**
+   * setManipSelectoreState function
+   * @param {string} manipName
+   * @param {boolean} selected
+   * @return {Element} an option element
+   */
+  const getNewManipOption = (manipName, selected) =>
+    new Option(manipName, manipName, selected ? true : false, false);
 
   const getNewInput = (manipName, manipIndex) => {
     return new Promise((resolve, reject) => {
@@ -168,43 +232,57 @@
       title.innerHTML = manipName;
       // input
       const input = document.createElement("input");
-      ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
-        input.addEventListener(event, function() {
+      [
+        "input",
+        "keydown",
+        "keyup",
+        "mousedown",
+        "mouseup",
+        "select",
+        "contextmenu",
+        "drop",
+      ].forEach(function (event) {
+        input.addEventListener(event, function () {
           if (!inputFilter(this.value)) {
             this.value = this.oldValue;
           } else {
             this.oldValue = this.value;
           }
-        })
-      })
+        });
+      });
 
       // button
       const button = document.createElement("button");
-      button.innerHTML = "Delete";
+      button.classList.add("deleteButton");
+      button.innerHTML = "X";
       button.onclick = deleteManip();
 
       newInputLi.appendChild(title);
       newInputLi.appendChild(input);
       newInputLi.appendChild(button);
       resolve(newInputLi);
-    })
-  }
-
+    });
+  };
 
   /**
   Onclick event functions
   */
 
-  const deleteManip = () => (event) => mainForm.deleteInput(event.originalTarget.parentNode)
-    .then(onSuccess)
-    .catch(onError)
-  const addManipInput = () => mainForm.addManipInput()
-    .then(onSuccess)
-    .catch(onError)
+  const deleteManip = () => (event) =>
+    mainForm
+      .deleteInput(event.originalTarget.parentNode)
+      .then(onSuccess)
+      .catch(mainForm.onError);
+
+  const addManipInput = () =>
+    mainForm.addManipInput().then(onSuccess).catch(mainForm.onError);
+
   /**
+   * upperFirstLetter function
    * @param {string} a string
    */
-  const upperFirstLetter = (str) => str[0].toUpperCase() + str.slice(1).toLowerCase();
+  const upperFirstLetter = (str) =>
+    str[0].toUpperCase() + str.slice(1).toLowerCase();
 
-  const inputFilter = (value) => /^\d*\.?(?:\d{1,2})?$/.test(value)
+  const inputFilter = (value) => /^\d*\.?(?:\d{1,2})?$/.test(value);
 </script>
