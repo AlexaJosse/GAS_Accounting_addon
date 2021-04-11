@@ -25,6 +25,6 @@
   "homepage": "https://github.com/AlexaJosse/GAS_Accounting_Addon#readme",
   "dependencies": {},
   "devDependencies": {
-    "clasp": "^1.0.0"
+    "@google/clasp": "^2.3.0"
   }
 }
