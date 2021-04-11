@@ -1,5 +1,5 @@
 .clasp.json
-
+.npmrc
 # Logs
 logs
 *.log
