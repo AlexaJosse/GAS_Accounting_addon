@@ -305,7 +305,7 @@
       ].forEach(function (event) {
         input.addEventListener(event, function () {
           if (!inputFilter(this.value)) {
-            this.value = mainForm.inputObject[this.id] = this.value;
+            this.value = mainForm.inputObject[this.id];
           } else {
             mainForm.inputObject[this.id] = this.value;
             setSubmitButtonState(!mainForm.isFormReadyToSubmit());
