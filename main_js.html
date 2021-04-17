@@ -3,9 +3,9 @@
     <button class="deleteButton">x</button>
     <h5>Manip Name</h5>
   </div>
-  <input type="text" />
+  <input type="text" placeholder="moyen" />
   <input type="date" />
-  <input type="text" />
+  <input type="text" placeholder="123€" />
 </li>
 
 <script>
@@ -204,9 +204,9 @@
         mainForm.selectedUserValue &&
         Object.keys(mainForm.inputObject).length
       ) {
-        let input
+        let input;
         for (input of Object.values(mainForm.inputObject)) {
-          if (!input.option || !input.date || ! input.amount) {
+          if (!input.option || !input.date || !input.amount) {
             isReady = false;
             break;
           }
@@ -326,7 +326,7 @@
           setSubmitButtonState(!mainForm.isFormReadyToSubmit());
         }
       });
-      
+
       newInputLi.style = "";
       resolve(newInputLi);
     });
