@@ -1,7 +1,18 @@
+<li id="input_template" style="display: none">
+  <div class="manipName">
+    <button class="deleteButton">x</button>
+    <h5>Manip Name</h5>
+  </div>
+  <input type="text" placeholder="moyen" />
+  <input type="date" />
+  <input type="text" placeholder="123€" />
+</li>
+
 <script>
   /// CONSTANT DECLARATION ///
 
   // Ids of HTML elements //
+  const INPUT_TEMPLATE = "input_template";
   const SELECT_MANIP = "select_manip";
   const SELECT_USER = "select_user";
   const INPUT_LIST = "input_list";
@@ -16,6 +27,7 @@
   const addManipButton = document.getElementById(ADD_MANIP_BUTTON);
   const errorSpan = document.getElementById(ERROR);
   const submitButton = document.getElementById(SUBMIT_BUTTON);
+  const inputTemplate = document.getElementById(INPUT_TEMPLATE);
 
   /**
    * @class
@@ -134,7 +146,11 @@
           getNewInput(manip.name)
             .then((newInputLi) => {
               inputList.appendChild(newInputLi);
-              this.inputObject[manip.name] = 0;
+              this.inputObject[manip.name] = {
+                option: "",
+                date: null,
+                amount: 0,
+              };
               setSubmitButtonState(true);
               this.buildManipSelector().then((data) => {
                 if (
@@ -188,9 +204,11 @@
         mainForm.selectedUserValue &&
         Object.keys(mainForm.inputObject).length
       ) {
-        for (const amount of Object.values(mainForm.inputObject)) {
-          if (!amount) {
+        let input;
+        for (input of Object.values(mainForm.inputObject)) {
+          if (!input.option || !input.date || !input.amount) {
             isReady = false;
+            break;
           }
         }
       } else {
@@ -284,45 +302,32 @@
    */
   const getNewInput = (manipName) => {
     return new Promise((resolve, reject) => {
-      // Creates the li parent element
-      const newInputLi = document.createElement("li");
+      const newInputLi = inputTemplate.cloneNode(true);
+      const childrenList = newInputLi.children;
+      // Sets the id
       newInputLi.id = "li_" + manipName;
-      // title
-      const title = document.createElement("h5");
-      title.innerHTML = manipName;
-      // input
-      const input = document.createElement("input");
-      input.id = manipName;
-      [
-        "input",
-        "keydown",
-        "keyup",
-        "mousedown",
-        "mouseup",
-        "select",
-        "contextmenu",
-        "drop",
-      ].forEach(function (event) {
-        input.addEventListener(event, function () {
-          if (!inputFilter(this.value)) {
-            this.value = mainForm.inputObject[this.id];
-          } else {
-            mainForm.inputObject[this.id] = this.value;
-            setSubmitButtonState(!mainForm.isFormReadyToSubmit());
-          }
-        });
+      // Sets title
+      childrenList[0].children[1].innerHTML = manipName;
+      // Set input ids
+      //childrenList[1].id = "option_" + manipName;
+      childrenList[1].addEventListener("input", function () {
+        mainForm.inputObject[manipName].option = this.value;
+      });
+      //childrenList[2].id = "date_" + manipName;
+      childrenList[2].addEventListener("input", function () {
+        mainForm.inputObject[manipName].date = this.value;
+      });
+      //childrenList[3].id = "amount_" + manipName;
+      childrenList[3].addEventListener("input", function () {
+        if (!inputFilter(this.value)) {
+          this.value = mainForm.inputObject[manipName].amount;
+        } else {
+          mainForm.inputObject[manipName].amount = this.value;
+          setSubmitButtonState(!mainForm.isFormReadyToSubmit());
+        }
       });
 
-      // button
-      const button = document.createElement("button");
-      button.classList.add("deleteButton");
-      button.innerHTML = "X";
-      button.onclick = deleteManip;
-
-      // Appends every element to the li parent
-      newInputLi.appendChild(title);
-      newInputLi.appendChild(input);
-      newInputLi.appendChild(button);
+      newInputLi.style = "";
       resolve(newInputLi);
     });
   };
