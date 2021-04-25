@@ -77,7 +77,7 @@ const onSidebarLoaded = () => {
  * onSubmit function
  * @return {object}
  */
-const onSubmit = (selectedUser, inputObject) => {
+const onSubmit = async (selectedUser, inputObject) => {
   console.log(selectedUser);
   console.log(inputObject);
 
@@ -92,8 +92,8 @@ const onSubmit = (selectedUser, inputObject) => {
   for (personIndex in personNicknameList) {
     if (personNicknameList[personIndex] === selectedUser) break;
   }
-  personRow = +3;
   if (!personIndex) throw new Error("User not found");
+  const personRow = personIndex + 3;
 
   let manipName;
   let input;
@@ -101,12 +101,16 @@ const onSubmit = (selectedUser, inputObject) => {
   let promiseArray = [];
   for (manipName in inputObject) {
     promiseArray.push(
-      new Promise((resolve) => {
-        input = inputObject[input];
+      new Promise((resolve, reject) => {
+        input = inputObject[manipName];
         console.log(manipName);
         console.log(input);
         sheet = mainSpreadsheet.getSheetByName(manipName);
-        sheet.getRange(personIndex, 7, 1, 1).setValue(input.amount);
+        if (!Object.keys(sheet).length) {
+          const err = new Error(`No sheet found with the name : ${manipName}`);
+          reject(err);
+        }
+        sheet.getRange(personRow, 7, 1, 1).setValue(input.amount);
         sheet
           .getRange(personRow, 9, 1, 2)
           .setValues([[input.option, input.date]]);
@@ -114,13 +118,7 @@ const onSubmit = (selectedUser, inputObject) => {
       })
     );
   }
-  Promise.all(promiseArray)
-    .then(() => {
-      console.log("Success");
-      return { status: "ok", message: "User input correctly handled." };
-    })
-    .catch((error) => {
-      console.error(error);
-      return { status: "nok", error: error };
-    });
+
+  await Promise.all(promiseArray);
+  return { status: "ok", message: "User input correctly handled." };
 };
