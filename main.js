@@ -89,9 +89,14 @@ const onSubmit = async (selectedUser, inputObject) => {
     .map((nickName) => nickName[0])
     .filter((nickName) => nickName);
   let personIndex;
-  for (personIndex in personNicknameList) {
-    if (personNicknameList[personIndex] === selectedUser) break;
+  for (let i = 0; i < personNicknameList.length; i++) {
+    if (personNicknameList[i] === selectedUser) {
+      personIndex = i;
+      break;
+    }
   }
+
+  console.log(personIndex);
   if (!personIndex) throw new Error("User not found");
   const personRow = personIndex + 3;
 
@@ -106,7 +111,9 @@ const onSubmit = async (selectedUser, inputObject) => {
         console.log(manipName);
         console.log(input);
         sheet = mainSpreadsheet.getSheetByName(manipName);
-        if (!Object.keys(sheet).length) {
+        console.log(sheet);
+        console.log(sheet.getName());
+        if (!sheet) {
           const err = new Error(`No sheet found with the name : ${manipName}`);
           reject(err);
         }
