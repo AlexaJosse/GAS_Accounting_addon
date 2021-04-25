@@ -78,9 +78,6 @@ const onSidebarLoaded = () => {
  * @return {object}
  */
 const onSubmit = async (selectedUser, inputObject) => {
-  console.log(selectedUser);
-  console.log(inputObject);
-
   const mainSpreadsheet = SpreadsheetApp.getActive();
   const mainSheet = mainSpreadsheet.getSheetByName(MAIN_SHEET);
   const personNicknameList = mainSheet
@@ -91,35 +88,28 @@ const onSubmit = async (selectedUser, inputObject) => {
   let personIndex;
   for (let i = 0; i < personNicknameList.length; i++) {
     if (personNicknameList[i] === selectedUser) {
-      personIndex = i;
+      personIndex = i + 3;
       break;
     }
   }
 
-  console.log(personIndex);
   if (!personIndex) throw new Error("User not found");
-  const personRow = personIndex + 3;
 
-  let manipName;
   let input;
   let sheet;
   let promiseArray = [];
-  for (manipName in inputObject) {
+  for (const manipName in inputObject) {
     promiseArray.push(
       new Promise((resolve, reject) => {
         input = inputObject[manipName];
-        console.log(manipName);
-        console.log(input);
         sheet = mainSpreadsheet.getSheetByName(manipName);
-        console.log(sheet);
-        console.log(sheet.getName());
         if (!sheet) {
           const err = new Error(`No sheet found with the name : ${manipName}`);
           reject(err);
         }
-        sheet.getRange(personRow, 7, 1, 1).setValue(input.amount);
+        sheet.getRange(personIndex, 7, 1, 1).setValue(input.amount);
         sheet
-          .getRange(personRow, 9, 1, 2)
+          .getRange(personIndex, 9, 1, 2)
           .setValues([[input.option, input.date]]);
         resolve();
       })

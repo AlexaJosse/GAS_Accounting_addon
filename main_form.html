@@ -94,7 +94,6 @@
     google.script.run
       .withSuccessHandler((values) => {
         values = JSON.parse(values);
-        console.log("Got data from back-end ");
         mainForm = new FormComponent(values.userArray, values.manipArray);
       })
       .withFailureHandler(onError)

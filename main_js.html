@@ -245,7 +245,6 @@
    * @param {object} error
    */
   const onError = (error) => {
-    console.log("Got an error :");
     console.error(error);
     errorSpan.innerHTML = error.message;
     errorSpan.style.display = "block";
