@@ -40,7 +40,6 @@ const getUsers = (mainSheet) => {
       lastName: userRow[0],
       firstName: userRow[1],
       nickName: userRow[2],
-      number: userRow[3],
     }));
 };
 
@@ -72,4 +71,51 @@ const onSidebarLoaded = () => {
     userArray: getUsers(mainSpreadsheet.getSheetByName(MAIN_SHEET)),
     manipArray: getManips(mainSpreadsheet.getSheetByName(MANIP_SHEET)),
   });
+};
+
+/**
+ * onSubmit function
+ * @return {object}
+ */
+const onSubmit = async (selectedUser, inputObject) => {
+  const mainSpreadsheet = SpreadsheetApp.getActive();
+  const mainSheet = mainSpreadsheet.getSheetByName(MAIN_SHEET);
+  const personNicknameList = mainSheet
+    .getRange(2, 3, mainSheet.getLastRow() - 1, 1)
+    .getValues()
+    .map((nickName) => nickName[0])
+    .filter((nickName) => nickName);
+  let personIndex;
+  for (let i = 0; i < personNicknameList.length; i++) {
+    if (personNicknameList[i] === selectedUser) {
+      personIndex = i + 3;
+      break;
+    }
+  }
+
+  if (!personIndex) throw new Error("User not found");
+
+  let input;
+  let sheet;
+  let promiseArray = [];
+  for (const manipName in inputObject) {
+    promiseArray.push(
+      new Promise((resolve, reject) => {
+        input = inputObject[manipName];
+        sheet = mainSpreadsheet.getSheetByName(manipName);
+        if (!sheet) {
+          const err = new Error(`No sheet found with the name : ${manipName}`);
+          reject(err);
+        }
+        sheet.getRange(personIndex, 7, 1, 1).setValue(input.amount);
+        sheet
+          .getRange(personIndex, 9, 1, 2)
+          .setValues([[input.option, input.date]]);
+        resolve();
+      })
+    );
+  }
+
+  await Promise.all(promiseArray);
+  return { status: "ok", message: "User input correctly handled." };
 };
